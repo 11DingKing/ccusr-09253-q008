@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import select
@@ -53,6 +52,9 @@ def _to_core_event(row: EventModel) -> CoreEvent:
         student_id=row.student_id,
         payload=dict(row.payload),
         created_at=row.created_at,
+        source=row.source,
+        exchange_status=row.exchange_status,
+        suppressed=bool(row.exchange_suppressed),
     )
 
 
@@ -72,6 +74,7 @@ def insert_events(
             student_id=e["student_id"],
             event_type=e["event_type"],
             payload=e["payload"],
+            source="local",
         )
         stmt = stmt.on_conflict_do_nothing(
             index_elements=["event_id", "plan_version"]
@@ -87,19 +90,6 @@ def insert_events(
 
 def load_events(db: Session, plan_version: str) -> list[CoreEvent]:
     stmt = select(EventModel).where(EventModel.plan_version == plan_version)
-    rows = db.execute(stmt).scalars().all()
-    return [_to_core_event(r) for r in rows]
-
-
-def load_events_up_to(
-    db: Session, plan_version: str, max_event_id: str
-) -> list[CoreEvent]:
-    """执行确定性的业务处理。"""
-    stmt = (
-        select(EventModel)
-        .where(EventModel.plan_version == plan_version)
-        .where(EventModel.event_id <= max_event_id)
-    )
     rows = db.execute(stmt).scalars().all()
     return [_to_core_event(r) for r in rows]
 

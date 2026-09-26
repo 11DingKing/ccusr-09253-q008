@@ -88,6 +88,10 @@ class CheckinExplanation(BaseModel):
     activity_type: str
     status: str
     counts: bool
+    source: str = "local"
+    exchange_status: str | None = None
+    disputed: bool = False
+    duplicate_of: str | None = None
     check_in_at_utc: str
     check_out_at_utc: str
     raw_seconds: int

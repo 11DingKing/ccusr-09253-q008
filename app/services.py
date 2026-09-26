@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -14,7 +13,6 @@ from .repository import (
     insert_events,
     insert_freeze,
     load_events,
-    load_events_up_to,
     max_event_id,
     upsert_plan,
 )
